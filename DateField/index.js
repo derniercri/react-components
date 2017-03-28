@@ -2,10 +2,12 @@ import React from 'react'
 import {
   View,
   DatePickerIOS,
-  Platform
+  Platform,
 } from 'react-native'
 import moment from 'moment'
 import 'moment/locale/fr'
+
+import { dateFieldStyles } from '../../styles'
 
 import DatePickerAndroid from './DatePickerAndroid'
 
@@ -18,55 +20,44 @@ const formatDateValue = rawDate => {
   return new Date(dateValue)
 }
 
+const formatOutputDate = rawDate => moment(rawDate).format('DD MMM YYYY, hh:mm')
+
 const Picker = Platform.OS === 'ios' ? DatePickerIOS : DatePickerAndroid
 
 const DateInput = ({
-  styles,
-  value,
+  selectedValue,
+  androidStyles,
   mode,
-  format,
-  onChange,
+  onValueChange,
   minDate,
-  maxDate
+  maxDate,
 }) => (
-  <View>
+  <View style={dateFieldStyles.pickerHolder}>
     <Picker
-      initDate={formatDateValue(value)}
-      date={formatDateValue(value)}
+      initDate={formatDateValue(selectedValue)}
+      date={formatDateValue(selectedValue)}
       minimumDate={minDate}
       maximumDate={maxDate}
       mode={mode}
-      onDateChange={onChange}
+      androidStyles={androidStyles}
+      onDateChange={date => onValueChange(formatOutputDate(date))}
     />
   </View>
 )
 
 DateInput.propTypes = {
-  format: React.PropTypes.string,
-  styles: React.PropTypes.objectOf(React.PropTypes.oneOfType([
-    React.PropTypes.string,
-    React.PropTypes.number,
-    React.PropTypes.objectOf(React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.number
-    ]))
-  ])),
-  value: React.PropTypes.oneOfType([React.PropTypes.instanceOf(Date), React.PropTypes.number]),
+  androidStyles: React.PropTypes.object,
+  selectedValue: React.PropTypes.oneOfType([React.PropTypes.instanceOf(Date), React.PropTypes.number, React.PropTypes.string]),
   mode: React.PropTypes.string,
   minDate: React.PropTypes.instanceOf(Date),
   maxDate: React.PropTypes.instanceOf(Date),
-  onChange: React.PropTypes.func.isRequired
+  onValueChange: React.PropTypes.func.isRequired,
 }
 
 DateInput.defaultProps = {
-  format: 'dd. DD MMM YYYY',
-  styles: {
-    value: {},
-    picker: {}
-  },
-  value: new Date(),
-  mode: 'date',
-  maxDate: moment().toDate()
+  selectedValue: new Date(),
+  mode: 'datetime',
+  maxDate: moment().toDate(),
 }
 
 export default DateInput
