@@ -7,8 +7,6 @@ import {
 import moment from 'moment'
 import 'moment/locale/fr'
 
-import { dateFieldStyles } from '../../styles'
-
 import DatePickerAndroid from './DatePickerAndroid'
 
 moment.locale('fr')
@@ -32,7 +30,7 @@ const DateInput = ({
   minDate,
   maxDate,
 }) => (
-  <View style={dateFieldStyles.pickerHolder}>
+  <View style={androidStyles.pickerHolder}>
     <Picker
       initDate={formatDateValue(selectedValue)}
       date={formatDateValue(selectedValue)}
