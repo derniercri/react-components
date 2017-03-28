@@ -1,0 +1,23 @@
+{
+  "name": "react-components",
+  "version": "1.0.0",
+  "description": "Set of useful component",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derniercri/react-components.git"
+  },
+  "keywords": [
+    "datefield",
+    "map"
+  ],
+  "author": "Dernier Cri",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/derniercri/react-components/issues"
+  },
+  "homepage": "https://github.com/derniercri/react-components#readme"
+}
