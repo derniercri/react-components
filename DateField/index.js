@@ -18,7 +18,6 @@ const formatDateValue = rawDate => {
   return new Date(dateValue)
 }
 
-const formatOutputDate = rawDate => moment(rawDate).format('DD MMM YYYY, hh:mm')
 
 const Picker = Platform.OS === 'ios' ? DatePickerIOS : DatePickerAndroid
 
@@ -38,7 +37,7 @@ const DateInput = ({
       maximumDate={maxDate}
       mode={mode}
       androidStyles={androidStyles}
-      onDateChange={date => onValueChange(formatOutputDate(date))}
+      onDateChange={date => onValueChange(date)}
     />
   </View>
 )
@@ -55,7 +54,6 @@ DateInput.propTypes = {
 DateInput.defaultProps = {
   selectedValue: new Date(),
   mode: 'datetime',
-  maxDate: moment().toDate(),
 }
 
 export default DateInput

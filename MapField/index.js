@@ -2,14 +2,13 @@ import React from 'react'
 import {
   View,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native'
-import GeolocateInput from '../../geolocate-input'
-import { fieldStyle } from '../styles'
-import { autocomplete, geocode, getPlaceByLocation } from '../../../helpers/location'
+import GeolocateInput from './GeolocateInput'
+import defaultStyles from './styles'
+import { setApiKey, autocomplete, geocode, getPlaceByLocation } from './helpers'
 
 class MapField extends React.Component {
   constructor (props) {
@@ -17,21 +16,29 @@ class MapField extends React.Component {
 
     this.searchTimeout = null
 
-    const {value = {}} = props
+    const {address, coords = {}, googlePlaceKey} = props
+
+    setApiKey(googlePlaceKey)
 
     this.state = {
-      typing: false,
-      address: value.address || '',
+      address,
+      coords,
       suggestions: [],
-      coords: value.coords || null
+      typing: false,
     }
   }
 
-  componentWillReceiveProps (props) {
-    const {value = {}} = props
-    this.setState({
-      address: value.address || ''
-    })
+  componentWillMount () {
+    if(this.state.address) {
+      this.getCoordsForAddress(this.state.address)
+    }
+  }
+
+  async getCoordsForAddress(address) {
+    const response = await autocomplete(address)
+    if (response.status === 'OK' && response.predictions.length) {
+      this.geocode(response.predictions[0].place_id)
+    }
   }
 
   geocode (placeId) {
@@ -41,14 +48,13 @@ class MapField extends React.Component {
         this.setState({
           coords: {
             latitude: lat,
-            longitude: lng
-          }
+            longitude: lng,
+          },
         }, () => {
           this.setState({
-            typing: false
+            typing: false,
           })
-          const { address, coords } = this.state
-          this.props.onChange('location', {address, coords})
+          this.props.onChange(this.state.address)
         })
       }
     })
@@ -64,14 +70,14 @@ class MapField extends React.Component {
             address: formatted_address,
             coords: {
               latitude: lat,
-              longitude: lng
-            }
+              longitude: lng,
+            },
           }, () => {
             this.setState({
-              typing: false
+              typing: false,
             })
-            const { address, coords } = this.state
-            this.props.onChange('location', {address, coords})
+
+            this.props.onChange(this.state.address)
           })
         }
       })
@@ -87,52 +93,62 @@ class MapField extends React.Component {
             suggestions: response.predictions.reduce((suggestions, place) => {
               suggestions.push({
                 name: place.description,
-                placeId: place.place_id
+                placeId: place.place_id,
               })
               return suggestions
-            }, [])
+            }, []),
           })
         }
       }, 200)
     } else {
       this.setState({
-        suggestions: []
+        suggestions: [],
       })
       this.geocode(placeId)
     }
     this.setState({
       typing: true,
-      address: text
+      address: text,
     })
   }
 
   render () {
+    const {
+      customStyles,
+      placeholder,
+    } = this.props
+
+    const styles = {
+      ...defaultStyles,
+      ...customStyles,
+    }
+
     return (
-      <View style={this.props.lightDisplay ? fieldStyle.lightDisplay : fieldStyle.mapPage}>
-        <View style={[fieldStyle.fieldContainer]}>
+      <View>
+        <View style={styles.fieldContainer}>
           <TextInput
-            placeholder={this.props.placeholder}
+            placeholder={placeholder}
             value={this.state.address}
-            style={[fieldStyle.field]}
+            style={styles.field}
             onChangeText={text => this.onChangeText(text, true)}
             underlineColorAndroid="transparent"
           />
         </View>
-        {this.state.typing || this.props.lightDisplay ? (
-          <ScrollView style={this.props.lightDisplay ? fieldStyle.mapSuggestHolderLight : fieldStyle.mapSuggestHolder}>
-            {this.state.suggestions.map((suggest, key) => (
-              <TouchableOpacity key={`suggest-${suggest.name}`} onPress={() => this.onChangeText(suggest.name, false, suggest.placeId)} style={{flex: 1}}>
-                <Text style={fieldStyle.suggestText}>
-                    {suggest.name}
+        {this.state.typing ? (
+          <ScrollView style={styles.mapSuggestHolder}>
+            {this.state.suggestions.map(suggest => (
+              <TouchableOpacity key={`suggest-${suggest.name}`} onPress={() => this.onChangeText(suggest.name, false, suggest.placeId)} style={styles.mapSuggestButton}>
+                <Text style={styles.suggestText}>
+                  {suggest.name}
                 </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         ) : (
-          <View style={fieldStyle.mapHolder}>
+          <View style={styles.mapHolder}>
             <GeolocateInput
               allowScroll={true}
-              styles={{container: StyleSheet.flatten(fieldStyle.mapContainer)}}
+              styles={styles}
               location={this.state.coords}
               region={this.state.coords}
               mapPreviewerHeight={350}
@@ -146,10 +162,18 @@ class MapField extends React.Component {
 }
 
 MapField.propTypes = {
-  lightDisplay: React.PropTypes.bool,
-  value: React.PropTypes.object,
-  onChange: React.PropTypes.func,
-  placeholder: React.PropTypes.string
+  customStyles: React.PropTypes.object,
+  googlePlaceKey: React.PropTypes.string.isRequired,
+  field: React.PropTypes.string.isRequired,
+  address: React.PropTypes.string,
+  coords: React.PropTypes.object,
+  onChange: React.PropTypes.func.isRequired,
+  placeholder: React.PropTypes.string,
+}
+
+MapField.defaultProps = {
+  address: '',
+  coords: {},
 }
 
 export default MapField
