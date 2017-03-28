@@ -21,26 +21,41 @@ const formatDateValue = rawDate => {
 
 const Picker = Platform.OS === 'ios' ? DatePickerIOS : DatePickerAndroid
 
-const DateInput = ({
-  selectedValue,
-  androidStyles,
-  mode,
-  onValueChange,
-  minDate,
-  maxDate,
-}) => (
-  <View style={androidStyles.pickerHolder}>
-    <Picker
-      initDate={formatDateValue(selectedValue)}
-      date={formatDateValue(selectedValue)}
-      minimumDate={minDate}
-      maximumDate={maxDate}
-      mode={mode}
-      androidStyles={androidStyles}
-      onDateChange={date => onValueChange(date)}
-    />
-  </View>
-)
+class DateInput extends React.Component {
+  componentDidMount(){
+    const {
+      onValueChange,
+      selectedValue,
+    } = this.props
+
+    onValueChange(formatDateValue(selectedValue))
+  }
+
+  render() {
+    const {
+      selectedValue,
+      androidStyles,
+      mode,
+      onValueChange,
+      minDate,
+      maxDate,
+    } = this.props
+    
+    return (
+      <View style={androidStyles.pickerHolder}>
+        <Picker
+          initDate={formatDateValue(selectedValue)}
+          date={formatDateValue(selectedValue)}
+          minimumDate={minDate}
+          maximumDate={maxDate}
+          mode={mode}
+          androidStyles={androidStyles}
+          onDateChange={date => onValueChange(date)}
+        />
+      </View>
+    )
+  }
+}
 
 DateInput.propTypes = {
   androidStyles: React.PropTypes.object,
