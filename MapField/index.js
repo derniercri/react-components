@@ -8,7 +8,13 @@ import {
 } from 'react-native'
 import GeolocateInput from './GeolocateInput'
 import defaultStyles from './styles'
-import { setApiKey, autocomplete, geocode, getPlaceByLocation } from './helpers'
+import {
+  autocomplete,
+  extractAddressParts,
+  geocode,
+  getPlaceByLocation,
+  setApiKey,
+} from './helpers'
 
 class MapField extends React.Component {
   constructor (props) {
@@ -54,7 +60,7 @@ class MapField extends React.Component {
           this.setState({
             typing: false,
           })
-          this.props.onChange(this.state.address)
+          this.props.onChange(extractAddressParts(response))
         })
       }
     })
