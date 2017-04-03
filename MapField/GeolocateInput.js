@@ -52,6 +52,8 @@ class GeolocateInput extends React.Component {
         this.setState({
           region: getRegion(region),
         })
+      }, () => {}, {
+        enableHighAccuracy: false,
       })
     } else {
       this.setState({
@@ -100,7 +102,7 @@ class GeolocateInput extends React.Component {
           onPress={e => this.props.onLocationSet ? this.locationSet(e) : null}
           region={this.getMapRegion()}
         >
-          {this.state.location.latitude ? (<MapView.Marker coordinate={this.state.location} />) : null }
+          {this.state.location.latitude ? (<MapView.Marker coordinate={this.state.location} image={this.props.pinImage}/>) : null }
         </MapView>
         <View style={styles.mapMask} />
       </View>

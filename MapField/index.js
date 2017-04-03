@@ -17,9 +17,9 @@ import {
 } from './helpers'
 
 class MapField extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
-
+    this.mounted = false
     this.searchTimeout = null
 
     const {address, coords = {}, googlePlaceKey} = props
@@ -34,10 +34,18 @@ class MapField extends React.Component {
     }
   }
 
-  componentWillMount () {
+  componentWillMount() {
     if(this.state.address) {
       this.getCoordsForAddress(this.state.address)
     }
+  }
+
+  componentDidMount() {
+    this.mounted = true
+  }
+
+  componentWillUnmount() {
+    this.mounted = false
   }
 
   async getCoordsForAddress(address) {
@@ -47,7 +55,7 @@ class MapField extends React.Component {
     }
   }
 
-  geocode (placeId) {
+  geocode(placeId) {
     geocode(placeId).then(response => {
       if (response) {
         const { lat, lng } = response.geometry.location
@@ -66,10 +74,10 @@ class MapField extends React.Component {
     })
   }
 
-  setByCoords (location) {
+  setByCoords(location) {
     getPlaceByLocation(location)
       .then(response => {
-        if (response) {
+        if (response && this.mounted) {
           const { geometry, formatted_address } = response
           const { lat, lng } = geometry.location
           this.setState({
@@ -89,39 +97,42 @@ class MapField extends React.Component {
       })
   }
 
-  onChangeText (text, searchAutocomplete, placeId) {
+  onChangeText(text, searchAutocomplete, placeId) {
     clearTimeout(this.searchTimeout)
-    if (searchAutocomplete) {
-      this.searchTimeout = setTimeout(async () => {
-        const response = await autocomplete(text)
-        if (response.status === 'OK' && response.predictions.length) {
-          this.setState({
-            suggestions: response.predictions.reduce((suggestions, place) => {
-              suggestions.push({
-                name: place.description,
-                placeId: place.place_id,
-              })
-              return suggestions
-            }, []),
-          })
-        }
-      }, 200)
-    } else {
+    if (this.mounted) {
+      if (searchAutocomplete) {
+        this.searchTimeout = setTimeout(async () => {
+          const response = await autocomplete(text)
+          if (response.status === 'OK' && response.predictions.length) {
+            this.setState({
+              suggestions: response.predictions.reduce((suggestions, place) => {
+                suggestions.push({
+                  name: place.description,
+                  placeId: place.place_id,
+                })
+                return suggestions
+              }, []),
+            })
+          }
+        }, 200)
+      } else {
+        this.setState({
+          suggestions: [],
+        })
+        this.geocode(placeId)
+      }
       this.setState({
-        suggestions: [],
+        typing: true,
+        address: text,
       })
-      this.geocode(placeId)
     }
-    this.setState({
-      typing: true,
-      address: text,
-    })
   }
 
-  render () {
+  render() {
     const {
       customStyles,
       placeholder,
+      pinImage,
     } = this.props
 
     const styles = {
@@ -159,6 +170,7 @@ class MapField extends React.Component {
               region={this.state.coords}
               mapPreviewerHeight={350}
               onLocationSet={location => this.setByCoords(location)}
+              pinImage={pinImage}
             />
           </View>
         )}
@@ -175,6 +187,7 @@ MapField.propTypes = {
   coords: React.PropTypes.object,
   onChange: React.PropTypes.func.isRequired,
   placeholder: React.PropTypes.string,
+  pinImage: React.PropTypes.any,
 }
 
 MapField.defaultProps = {
