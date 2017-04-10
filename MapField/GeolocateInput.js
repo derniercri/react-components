@@ -1,19 +1,21 @@
 import React from 'react'
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
+import { View } from 'react-native'
 import MapView from 'react-native-maps'
 
 import defaultStyles from './styles'
 
-const getRegion = region => {
-  return region ? {
+const getRegion = (region = {}, currentRegion = {}) => {
+  const defaultRegion = {
+    latitude: 46.8104242,
+    longitude: 1.5360035,
+    latitudeDelta: 10,
+    longitudeDelta: 10,
+  }
+  return {
+    ...defaultRegion,
+    ...currentRegion,
     ...region,
-    latitudeDelta: 0.001,
-    longitudeDelta: 0.001,
-  } : null
+  }
 }
 
 class GeolocateInput extends React.Component {
@@ -39,7 +41,7 @@ class GeolocateInput extends React.Component {
   }
 
   checkRegion (props) {
-    if (!props.region.latitude) {
+    if (!props.region || !props.region.latitude) {
       navigator.geolocation.getCurrentPosition(position => {
         if (!position.coords) {
           return false
@@ -48,6 +50,8 @@ class GeolocateInput extends React.Component {
         const region = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
         }
         this.setState({
           region: getRegion(region),
@@ -57,7 +61,10 @@ class GeolocateInput extends React.Component {
       })
     } else {
       this.setState({
-        region: getRegion(props.region),
+        region: getRegion(props.region, {
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
+        }),
       })
     }
   }
@@ -82,12 +89,6 @@ class GeolocateInput extends React.Component {
   }
 
   render () {
-    if (!this.state.region) {
-      return (
-        <Text>chargement ...</Text>
-      )
-    }
-
     const styles = {
       ...defaultStyles,
       ...this.props.styles,
@@ -102,7 +103,7 @@ class GeolocateInput extends React.Component {
           onPress={e => this.props.onLocationSet ? this.locationSet(e) : null}
           region={this.getMapRegion()}
         >
-          {this.state.location.latitude ? (<MapView.Marker coordinate={this.state.location} image={this.props.pinImage}/>) : null }
+          {this.state.location && this.state.location.latitude ? (<MapView.Marker coordinate={this.state.location} image={this.props.pinImage}/>) : null }
         </MapView>
         <View style={styles.mapMask} />
       </View>

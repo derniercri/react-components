@@ -17,12 +17,12 @@ import {
 } from './helpers'
 
 class MapField extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.mounted = false
     this.searchTimeout = null
 
-    const {address, coords = {}, googlePlaceKey} = props
+    const {address, coords, googlePlaceKey} = props
 
     setApiKey(googlePlaceKey)
 
@@ -34,29 +34,26 @@ class MapField extends React.Component {
     }
   }
 
-  componentWillMount() {
-    if(this.state.address) {
+  componentWillMount () {
+    if (this.state.address) {
       this.getCoordsForAddress(this.state.address)
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.mounted = true
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.mounted = false
   }
 
-  async getCoordsForAddress(address) {
-    const response = await autocomplete(address)
-    if (response.status === 'OK' && response.predictions.length) {
-      this.geocode(response.predictions[0].place_id)
-    }
+  async getCoordsForAddress (address) {
+    this.geocode(null, address)
   }
 
-  geocode(placeId) {
-    geocode(placeId).then(response => {
+  geocode (placeId, address) {
+    geocode(placeId, address).then(response => {
       if (response) {
         const { lat, lng } = response.geometry.location
         this.setState({
@@ -74,7 +71,7 @@ class MapField extends React.Component {
     })
   }
 
-  setByCoords(location) {
+  setByCoords (location) {
     getPlaceByLocation(location)
       .then(response => {
         if (response && this.mounted) {
@@ -90,14 +87,13 @@ class MapField extends React.Component {
             this.setState({
               typing: false,
             })
-
-            this.props.onChange(this.state.address)
+            this.props.onChange(extractAddressParts(response))
           })
         }
       })
   }
 
-  onChangeText(text, searchAutocomplete, placeId) {
+  onChangeText (text, searchAutocomplete, placeId) {
     clearTimeout(this.searchTimeout)
     if (this.mounted) {
       if (searchAutocomplete) {
@@ -124,11 +120,13 @@ class MapField extends React.Component {
       this.setState({
         typing: true,
         address: text,
+      }, () => {
+        this.props.onChange(text)
       })
     }
   }
 
-  render() {
+  render () {
     const {
       customStyles,
       placeholder,
@@ -192,7 +190,7 @@ MapField.propTypes = {
 
 MapField.defaultProps = {
   address: '',
-  coords: {},
+  coords: null,
 }
 
 export default MapField
