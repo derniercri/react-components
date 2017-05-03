@@ -24,7 +24,7 @@ class GeolocateInput extends React.Component {
 
     this.state = {
       displayMap: false,
-      location: props.location,
+      location: getRegion(props.location),
     }
   }
 
@@ -34,7 +34,7 @@ class GeolocateInput extends React.Component {
 
   componentWillReceiveProps (props) {
     this.setState({
-      location: props.location,
+      location: getRegion(props.location),
     })
 
     this.checkRegion(props)
@@ -85,7 +85,7 @@ class GeolocateInput extends React.Component {
   }
 
   getMapRegion () {
-    return this.state.location ? { ...this.state.region, ...this.state.location } : this.state.region
+    return this.state.location ? getRegion(this.state.location, this.state.region) : getRegion(this.state.region)
   }
 
   render () {
