@@ -165,6 +165,7 @@ class MapField extends React.Component {
               allowScroll={true}
               styles={styles}
               location={this.state.coords}
+              liteMode={this.props.liteMode}
               region={this.state.coords}
               mapPreviewerHeight={350}
               onLocationSet={location => this.setByCoords(location)}
@@ -184,6 +185,7 @@ MapField.propTypes = {
   address: React.PropTypes.string,
   coords: React.PropTypes.object,
   onChange: React.PropTypes.func.isRequired,
+  liteMode: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   pinImage: React.PropTypes.any,
 }

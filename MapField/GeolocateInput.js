@@ -13,8 +13,8 @@ const getRegion = (region = {}, currentRegion = {}) => {
   }
   return {
     ...defaultRegion,
-    ...currentRegion,
     ...region,
+    ...currentRegion,
   }
 }
 
@@ -102,6 +102,7 @@ class GeolocateInput extends React.Component {
           style={styles.map}
           onPress={e => this.props.onLocationSet ? this.locationSet(e) : null}
           region={this.getMapRegion()}
+          liteMode={this.props.liteMode}
         >
           {this.state.location && this.state.location.latitude ? (<MapView.Marker coordinate={this.state.location} image={this.props.pinImage}/>) : null }
         </MapView>
@@ -115,6 +116,7 @@ GeolocateInput.propTypes = {
   allowScroll: React.PropTypes.bool,
   value: React.PropTypes.string,
   placeholder: React.PropTypes.string,
+  liteMode: React.PropTypes.bool,
   region: React.PropTypes.shape({
     latitude: React.PropTypes.number,
     longitude: React.PropTypes.number,
