@@ -20,12 +20,19 @@ const monthLabel = [
   'déc',
 ]
 
+const getYearsDifference = date => {
+  const now = moment()
+  const diff = moment.duration(now.diff(date))
+
+  return diff.asYears()
+}
+
 const getYears = (count = 50) => {
   const currentYear = parseInt(moment().format('YYYY'))
   const firstYear = currentYear - count
   const years = []
 
-  for(i = currentYear; i >= firstYear; i--){
+  for (i = currentYear; i >= firstYear; i--){
     years.push(`${i}`)
   }
 
@@ -103,7 +110,7 @@ const updateState = (key, choice, date, cb) => {
   cb(newDate)
 }
 
-const DatePickerAndroid = ({androidStyles, date, mode, onDateChange}) => {
+const DatePickerAndroid = ({androidStyles, date, mode, onDateChange, minimumDate}) => {
   const styles = {
     ...defaultStyles,
     ...androidStyles,
@@ -116,7 +123,9 @@ const DatePickerAndroid = ({androidStyles, date, mode, onDateChange}) => {
     minute,
   } = getFieldValues(date)
 
-  const yearList = getYears()
+  const yearDifference = getYearsDifference(minimumDate)
+
+  const yearList = getYears(yearDifference)
   const dayList = getDays(year, month)
   const monthList = getMonth()
   const hourList = getHour()
@@ -212,10 +221,12 @@ DatePickerAndroid.propTypes = {
   onDateChange: React.PropTypes.func.isRequired,
   date: React.PropTypes.instanceOf(Date),
   mode: React.PropTypes.string,
+  minimumDate: React.PropTypes.object,
 }
 
 DatePickerAndroid.defaultProps = {
   mode: 'date', // or "datetime"
+  minimumDate: moment().subtract(50, 'years'),
 }
 
 export default DatePickerAndroid
