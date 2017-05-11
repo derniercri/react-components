@@ -44,10 +44,10 @@ export const extractAddressParts = response => {
   const cityZip = addressParts[1].trim().split(' ')
   const address = {
     full_address: response.formatted_address,
-    street: addressParts[0].trim(),
-    zipCode: cityZip[0].trim(),
-    city: cityZip[1].trim(),
-    country: addressParts[2].trim(),
+    street: addressParts[0] ? addressParts[0].trim() : '',
+    zipCode: cityZip[0] ? cityZip[0].trim() : '',
+    city: cityZip[1] ? cityZip[1].trim() : 0,
+    country: addressParts[2] ? addressParts[2].trim() : 0,
   }
 
   return address

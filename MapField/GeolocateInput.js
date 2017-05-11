@@ -103,6 +103,7 @@ class GeolocateInput extends React.Component {
           onPress={e => this.props.onLocationSet ? this.locationSet(e) : null}
           region={this.getMapRegion()}
           liteMode={this.props.liteMode}
+          toolbarEnabled={false}
         >
           {this.state.location && this.state.location.latitude ? (<MapView.Marker coordinate={this.state.location} image={this.props.pinImage}/>) : null }
         </MapView>
