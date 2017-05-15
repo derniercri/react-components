@@ -29,24 +29,14 @@ const getYearsDifference = date => {
 
 const getYears = (count = 50) => {
   const currentYear = parseInt(moment().format('YYYY'))
-  const firstYear = currentYear - count
+  let firstYear = currentYear - count
   const years = []
 
-  for (i = currentYear; i >= firstYear; i--){
+  for (i = currentYear; i >= firstYear ; i-- ) {
     years.push(`${i}`)
   }
 
   return years
-}
-
-const getMonth = () => {
-  const month = []
-
-  for (var i = 0; i < 12; i++) {
-    month.push(i)
-  }
-
-  return month
 }
 
 const getDays = (year, month) => {
@@ -127,7 +117,6 @@ const DatePickerAndroid = ({androidStyles, date, mode, onDateChange, minimumDate
 
   const yearList = getYears(yearDifference)
   const dayList = getDays(year, month)
-  const monthList = getMonth()
   const hourList = getHour()
   const minuteList = getMinute()
 
@@ -167,7 +156,7 @@ const DatePickerAndroid = ({androidStyles, date, mode, onDateChange, minimumDate
         key="year"
         itemStyle={styles.itemStyle}
         pickerStyle={styles.pickerStyle}
-        selectedValue={yearList.indexOf(year)}
+        selectedValue={`${year}`}
         onValueChange={choice => updateState('year', choice, date, onDateChange)}
       >
         {yearList.map((yearItem, i) => (
