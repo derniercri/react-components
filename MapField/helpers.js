@@ -41,13 +41,16 @@ export const getPlaceByLocation = async location => {
 
 export const extractAddressParts = response => {
   const addressParts = response.formatted_address.split(',')
-  const cityZip = addressParts[1].trim().split(' ')
+  const zipCity = addressParts[1].trim().split(' ')
+  const zip = zipCity.length ? zipCity[0] : ''
+  const city = zipCity.slice(1).join(' ')
+
   const address = {
     full_address: response.formatted_address,
     street: addressParts[0] ? addressParts[0].trim() : '',
-    zipCode: cityZip[0] ? cityZip[0].trim() : '',
-    city: cityZip[1] ? cityZip[1].trim() : 0,
-    country: addressParts[2] ? addressParts[2].trim() : 0,
+    zipCode: zip.trim(),
+    city: city.trim(),
+    country: addressParts[2] ? addressParts[2].trim() : '',
   }
 
   return address
