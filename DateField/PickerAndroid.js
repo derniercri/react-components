@@ -1,254 +1,397 @@
-'use strict';
+import React from 'react'
+import MultiPicker from 'rmc-picker/lib/MultiPicker'
+import moment from 'moment'
 
-import React, {Component, PropTypes} from 'react';
-import {
-	View, 
-	Text, 
-	Image,
-	PanResponder
-} from 'react-native';
-import styles from './styles'
+function getDaysInMonth (now) {
+  return now.clone().endOf('month').date()
+}
 
-class PickerAndroidItem extends Component{
+function pad (n) {
+  return n < 10 ? `0${n}` : n + ''
+}
 
-	static propTypes = {
-		value: PropTypes.any,
-		label: PropTypes.any
-	};
+const smallPickerItem = {
+  fontSize: 20,
+}
 
-	constructor(props, context){
-		super(props, context);
-	}
+const DATETIME = 'datetime'
+const DATE = 'date'
+const TIME = 'time'
+const MONTH = 'month'
+const YEAR = 'year'
 
-	render() {
-		return null;
-	}
+class DatePicker extends React.Component {
+  onValueChange (values, index) {
+    const value = parseInt(values[index], 10)
 
-};
+    const {
+      mode,
+      onDateChange,
+    } = this.props
 
-export default class PickerAndroid extends Component{
+    let newValue = this.getDate().clone()
+    if (mode === DATETIME || mode === DATE || mode === YEAR || mode === MONTH) {
+      switch (index) {
+        case 0:
+          newValue.date(value)
+          break
+        case 1:
+          newValue.month(value)
+          break
+        case 2:
+          newValue.year(value)
+          break
+        case 3:
+          newValue.hour(value)
+          break
+        case 4:
+          newValue.minute(value)
+          break
+        default:
+          break
+      }
+    } else {
+      switch (index) {
+        case 0:
+          newValue.hour(value)
+          break
+        case 1:
+          newValue.minute(value)
+          break
+        default:
+          break
+      }
+    }
+    newValue = this.clipDate(newValue)
 
-	static Item = PickerAndroidItem;
+    onDateChange(newValue)
+  }
 
-	static propTypes = {
-		//picker's style
-		pickerStyle: View.propTypes.style,
-		//picker item's style
-		itemStyle: Text.propTypes.style,
-		//picked value changed then call this function
-		onValueChange: PropTypes.func,
-		//default to be selected value
-		selectedValue: PropTypes.any
-	};
+  getDefaultMinDate () {
+    if (!this.defaultMinDate) {
+      this.defaultMinDate = this.getGregorianCalendar([2000, 1, 1, 0, 0, 0])
+    }
+    return this.defaultMinDate
+  }
 
-	constructor(props, context){
-		super(props, context);
-		this.state = this._stateFromProps(this.props);
-	}
+  getDefaultMaxDate () {
+    if (!this.defaultMaxDate) {
+      this.defaultMaxDate = this.getGregorianCalendar([2030, 1, 1, 23, 59, 59])
+    }
+    return this.defaultMaxDate
+  }
 
-	componentWillReceiveProps(nextProps){
-		this.setState(this._stateFromProps(nextProps));
-	}
+  getDate () {
+    return this.props.date
+  }
 
-	shouldComponentUpdate(nextProps, nextState, context){
-		return JSON.stringify([{
-			selectedIndex: nextState.selectedIndex,
-			items: nextState.items,
-			pickerStyle: nextState.pickerStyle,
-			itemStyle: nextState.itemStyle,
-			onValueChange: nextState.onValueChange
-		}, context]) !== JSON.stringify([{
-			selectedIndex: this.state.selectedIndex,
-			items: this.state.items,
-			pickerStyle: this.state.pickerStyle,
-			itemStyle: this.state.itemStyle,
-			onValueChange: this.state.onValueChange
-		}, this.context]);
-	}
+  getValue () {
+    return this.getDate()
+  }
 
-	_stateFromProps(props){
-		let selectedIndex = 0;
-		let items = [];
-		let pickerStyle = props.pickerStyle;
-		let itemStyle = props.itemStyle;
-		let onValueChange = props.onValueChange;
-		React.Children.forEach(props.children, (child, index) => {
-			child.props.value === props.selectedValue && ( selectedIndex = index );
-			items.push({value: child.props.value, label: child.props.label});
-		});
-		return {
-			selectedIndex,
-			items,
-			pickerStyle,
-			itemStyle,
-			onValueChange
-		};
-	}
+  getMinYear () {
+    return this.getMinDate().year()
+  }
 
-	_move(dy){
-		let index = this.index;
-		this.middleHeight = Math.abs(-index * 40 + dy);
-		this.up && this.up.setNativeProps({
-			style: {
-				marginTop: (3 - index) * 30 + dy * .75,
-			},
-		});
-		this.middle && this.middle.setNativeProps({
-			style: {
-				marginTop: -index * 40 + dy,
-			},
-		});
-		this.down && this.down.setNativeProps({
-			style: {
-				marginTop: (-index - 1) * 30 + dy * .75,
-			},
-		});
-	}
+  getMaxYear () {
+    return this.getMaxDate().year()
+  }
 
-	_moveTo(index){
-		let _index = this.index;
-		let diff = _index - index;
-		let marginValue;
-		let that = this;
-		if(diff && !this.isMoving) {
-			marginValue = diff * 40;
-			this._move(marginValue);
-			this.index = index;
-			this._onValueChange();
-		}
-	}
-	//cascade mode will reset the wheel position
-	moveTo(index){
-		this._moveTo(index);
-	}
+  getMinMonth () {
+    return this.getMinDate().month()
+  }
 
-	moveUp(){
-		this._moveTo(Math.max(this.state.items.index - 1, 0));
-	}
+  getMaxMonth () {
+    return this.getMaxDate().month()
+  }
 
-	moveDown() {
-		this._moveTo(Math.min(this.index + 1, this.state.items.length - 1));
-	}
+  getMinDay () {
+    return this.getMinDate().date()
+  }
 
-	_handlePanResponderMove(evt, gestureState){
-		let dy = gestureState.dy;
-		if(this.isMoving) {
-			return;
-		}
-		// turn down
-		if(dy > 0) {
-			this._move(dy > this.index * 40 ? this.index * 40 : dy);
-		}else{
-			this._move(dy < (this.index - this.state.items.length + 1) * 40 ? (this.index - this.state.items.length + 1) * 40 : dy);
-		}
-	}
+  getMaxDay () {
+    return this.getMaxDate().date()
+  }
 
-	_handlePanResponderRelease(evt, gestureState){
-		let middleHeight = this.middleHeight;
-		this.index = middleHeight % 40 >= 20 ? Math.ceil(middleHeight / 40) : Math.floor(middleHeight / 40);
-		this._move(0);
-		this._onValueChange();
-	}
+  getMinHour () {
+    return this.getMinDate().hour()
+  }
 
-	componentWillMount(){
-		this._panResponder = PanResponder.create({
-			onMoveShouldSetPanResponder: (evt, gestureState) => true,
-			onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-			onPanResponderRelease: this._handlePanResponderRelease.bind(this),
-			onPanResponderMove: this._handlePanResponderMove.bind(this)
-		});
-		this.isMoving = false;
-		this.index = this.state.selectedIndex;
-	}
+  getMaxHour () {
+    return this.getMaxDate().hour()
+  }
 
-	componentWillUnmount(){
-		this.timer && clearInterval(this.timer);
-	}
+  getMinMinute () {
+    return this.getMinDate().minute()
+  }
 
-	_renderItems(items){
-		//value was used to watch the change of picker
-		//label was used to display 
-		let upItems = [], middleItems = [], downItems = [];
-		items.forEach((item, index) => {
+  getMaxMinute () {
+    return this.getMaxDate().minute()
+  }
 
-			upItems[index] = <Text
-								key={'up'+index}
-								style={[styles.upText, this.state.itemStyle]}
-								onPress={() => {
-									this._moveTo(index);
-								}} >
-								{item.label}
-							</Text>;
+  getMinDate () {
+    return this.props.minDate || this.getDefaultMinDate()
+  }
 
-			middleItems[index] = <Text
-									key={'mid'+index}
-									style={[styles.middleText, this.state.itemStyle]}>{item.label}
-								</Text>;
+  getMaxDate () {
+    return this.props.maxDate || this.getDefaultMaxDate()
+  }
 
-			downItems[index] = <Text
-									key={'down'+index}
-									style={[styles.downText, this.state.itemStyle]}
-									onPress={() => {
-										this._moveTo(index);
-									}} >
-									{item.label}
-								</Text>;
+  getDateData () {
+    const { locale, formatMonth, formatDay, mode } = this.props
+    const date = this.getDate()
+    const selYear = date.year()
+    const selMonth = date.month()
+    const minDateYear = this.getMinYear()
+    const maxDateYear = this.getMaxYear()
+    const minDateMonth = this.getMinMonth()
+    const maxDateMonth = this.getMaxMonth()
+    const minDateDay = this.getMinDay()
+    const maxDateDay = this.getMaxDay()
+    const years = []
+    for (let i = minDateYear; i <= maxDateYear; i++) {
+      years.push({
+        value: i + '',
+        label: i + locale.year + '',
+      })
+    }
+    const yearCol = { key: 'year', props: { children: years } }
+    if (mode === YEAR) {
+      return [ yearCol ]
+    }
 
-		});
-		return { upItems, middleItems, downItems, };
-	}
+    const months = []
+    let minMonth = 0
+    let maxMonth = 11
+    if (minDateYear === selYear) {
+      minMonth = minDateMonth
+    }
+    if (maxDateYear === selYear) {
+      maxMonth = maxDateMonth
+    }
+    for (let i = minMonth; i <= maxMonth; i++) {
+      const label = formatMonth ? formatMonth(i, date) : (i + 1 + locale.month + '')
+      months.push({
+        value: i + '',
+        label,
+      })
+    }
+    const monthCol = { key: 'month', props: { children: months } }
+    if (mode === MONTH) {
+      return [yearCol, monthCol]
+    }
 
-	_onValueChange(){
-		//the current picked label was more expected to be passed, 
-		//but PickerIOS only passed value, so we set label to be the second argument
-		//add by zooble @2015-12-10
-		var curItem = this.state.items[this.index];
-		if (curItem && this.state.onValueChange) {
-			this.state.onValueChange(curItem.value, curItem.label);
-		}
-	}
+    const days = []
+    let minDay = 1
+    let maxDay = getDaysInMonth(date)
 
-	render(){
-		let index = this.state.selectedIndex;
-		let length = this.state.items.length;
-		let items = this._renderItems(this.state.items);
+    if (minDateYear === selYear && minDateMonth === selMonth) {
+      minDay = minDateDay
+    }
+    if (maxDateYear === selYear && maxDateMonth === selMonth) {
+      maxDay = maxDateDay
+    }
+    for (let i = minDay; i <= maxDay; i++) {
+      const label = formatDay ? formatDay(i, date) : (i + locale.day + '')
+      days.push({
+        value: i + '',
+        label,
+      })
+    }
 
-		let upViewStyle = {
-			marginTop: (3 - index) * 30, 
-			height: length * 30, 
-		};
-		let middleViewStyle = {
-			marginTop:  -index * 40, 
-		};
-		let downViewStyle = {
-			marginTop: (-index - 1) * 30, 
-			height:  length * 30, 
-		};
-		
-		return (
-			//total to be 90*2+40=220 height
-			<View style={[styles.container, this.state.pickerStyle]} {...this._panResponder.panHandlers}>
+    return [
+      { key: 'day', props: { children: days } },
+      monthCol,
+      yearCol,
+    ]
+  }
 
-				<View style={styles.up}>
-					<View style={[styles.upView, upViewStyle]} ref={(up) => { this.up = up }} >
-						{ items.upItems }
-					</View>
-				</View>
+  getTimeData () {
+    let minHour = 0
+    let maxHour = 23
+    let minMinute = 0
+    let maxMinute = 59
+    const { mode, locale, minuteStep } = this.props
+    const date = this.getDate()
+    const minDateMinute = this.getMinMinute()
+    const maxDateMinute = this.getMaxMinute()
+    const minDateHour = this.getMinHour()
+    const maxDateHour = this.getMaxHour()
+    const hour = date.hour()
+    if (mode === DATETIME) {
+      const year = date.year()
+      const month = date.month()
+      const day = date.date()
+      const minDateYear = this.getMinYear()
+      const maxDateYear = this.getMaxYear()
+      const minDateMonth = this.getMinMonth()
+      const maxDateMonth = this.getMaxMonth()
+      const minDateDay = this.getMinDay()
+      const maxDateDay = this.getMaxDay()
+      if (minDateYear === year && minDateMonth === month && minDateDay === day) {
+        minHour = minDateHour
+        if (minDateHour === hour) {
+          minMinute = minDateMinute
+        }
+      }
+      if (maxDateYear === year && maxDateMonth === month && maxDateDay === day) {
+        maxHour = maxDateHour
+        if (maxDateHour === hour) {
+          maxMinute = maxDateMinute
+        }
+      }
+    } else {
+      minHour = minDateHour
+      if (minDateHour === hour) {
+        minMinute = minDateMinute
+      }
+      maxHour = maxDateHour
+      if (maxDateHour === hour) {
+        maxMinute = maxDateMinute
+      }
+    }
 
-				<View style={styles.middle}>
-					<View style={[styles.middleView, middleViewStyle]} ref={(middle) => { this.middle = middle }} >
-						{ items.middleItems }
-					</View>
-				</View>
+    const hours = []
+    for (let i = minHour; i <= maxHour; i++) {
+      hours.push({
+        value: i + '',
+        label: locale.hour ? i + locale.hour + '' : pad(i),
+      })
+    }
 
-				<View style={styles.down}>
-					<View style={[styles.downView, downViewStyle]} ref={(down) => { this.down = down }} >
-						{ items.downItems }
-					</View>
-				</View>
+    const minutes = []
+    for (let i = minMinute; i <= maxMinute; i += minuteStep) {
+      minutes.push({
+        value: i + '',
+        label: locale.minute ? i + locale.minute + '' : pad(i),
+      })
+    }
+    return [
+      { key: 'hours', props: { children: hours } },
+      { key: 'minutes', props: { children: minutes } },
+    ]
+  }
 
-			</View>
-		);
-	}
+  getGregorianCalendar (arg) {
+    return moment(arg)
+  }
 
-};
+  clipDate (date) {
+    const { mode } = this.props
+    const minDate = this.getMinDate()
+    const maxDate = this.getMaxDate()
+    if (mode === DATETIME) {
+      if (date.isBefore(minDate)) {
+        return minDate.clone()
+      }
+      if (date.isAfter(maxDate)) {
+        return maxDate.clone()
+      }
+    } else if (mode === DATE) {
+      if (date.isBefore(minDate, 'day')) {
+        return minDate.clone()
+      }
+      if (date.isAfter(maxDate, 'day')) {
+        return maxDate.clone()
+      }
+    } else {
+      const maxHour = maxDate.hour()
+      const maxMinutes = maxDate.minute()
+      const minHour = minDate.hour()
+      const minMinutes = minDate.minute()
+      const hour = date.hour()
+      const minutes = date.minute()
+      if (hour < minHour || (hour === minHour && minutes < minMinutes)) {
+        return minDate.clone()
+      }
+      if (hour > maxHour || (hour === maxHour && minutes > maxMinutes)) {
+        return maxDate.clone()
+      }
+    }
+    return date
+  }
+
+  getValueCols () {
+    const { mode } = this.props
+    const date = this.getDate()
+
+    let cols = []
+    let value = []
+
+    if (mode === YEAR) {
+      return {
+        cols: this.getDateData(),
+        value: [date.year() + ''],
+      }
+    }
+
+    if (mode === MONTH) {
+      return {
+        cols: this.getDateData(),
+        value: [date.month() + '', date.year() + ''],
+      }
+    }
+
+    if (mode === DATETIME || mode === DATE) {
+      cols = this.getDateData()
+      value = [date.date() + '', date.month() + '', date.year() + '']
+    }
+
+    if (mode === DATETIME || mode === TIME) {
+      cols = cols.concat(this.getTimeData())
+      value = value.concat([date.hour() + '', date.minute() + ''])
+    }
+    return {
+      value,
+      cols,
+    }
+  }
+
+  render () {
+    const {
+      cols,
+      value,
+    } = this.getValueCols()
+
+    const {
+      androidStyles,
+      className,
+      mode,
+      pickerPrefixCls,
+      prefixCls,
+      rootNativeProps,
+    } = this.props
+
+    return (
+      <MultiPicker
+        rootNativeProps={rootNativeProps}
+        className={className}
+        prefixCls={prefixCls}
+        pickerPrefixCls={pickerPrefixCls}
+        pickerItemStyle={[androidStyles, mode === 'datetime' ? smallPickerItem : undefined]}
+        selectedValue={value}
+        onValueChange={(values, index) => this.onValueChange(values, index)}
+      >
+        {cols}
+      </MultiPicker>
+    )
+  }
+}
+
+DatePicker.defaultProps = {
+  prefixCls: 'date-picker',
+  pickerPrefixCls: 'picker',
+  locale: {
+    year: '',
+    month: '',
+    day: '',
+    hour: '',
+    minute: '',
+  },
+  mode: DATE,
+  minuteStep: 1,
+  date: moment(),
+  onDateChange () {},
+}
+
+export default DatePicker

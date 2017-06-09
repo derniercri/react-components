@@ -15,14 +15,33 @@ const formatDateValue = rawDate => {
   const dateValue = typeof rawDate === 'number'
     ? parseFloat(rawDate) * 1000
     : rawDate
-  return new Date(dateValue)
-}
 
+  return dateValue ? new Date(dateValue) : new Date()
+}
 
 const Picker = Platform.OS === 'ios' ? DatePickerIOS : DatePickerAndroid
 
+const getMonthName = monthIndex => {
+  const month = [
+    'janv.',
+    'févr.',
+    'mars.',
+    'avr.',
+    'mai.', 
+    'juin.',
+    'juil.',
+    'août.',
+    'sept.',
+    'oct.',
+    'nov.',
+    'déc.',
+  ]
+
+  return month[monthIndex]
+}
+
 class DateInput extends React.Component {
-  componentDidMount(){
+  componentDidMount () {
     const {
       onValueChange,
       selectedValue,
@@ -31,7 +50,7 @@ class DateInput extends React.Component {
     onValueChange(formatDateValue(selectedValue))
   }
 
-  render() {
+  render () {
     const {
       selectedValue,
       androidStyles,
@@ -40,7 +59,7 @@ class DateInput extends React.Component {
       minDate,
       maxDate,
     } = this.props
-    
+
     return (
       <View style={androidStyles.pickerHolder}>
         <Picker
@@ -50,6 +69,8 @@ class DateInput extends React.Component {
           maximumDate={maxDate}
           mode={mode}
           androidStyles={androidStyles}
+          formatDay={i => i.toString().padStart(2, '0')}
+          formatMonth={(i, date) => getMonthName(i)}
           onDateChange={date => onValueChange(date)}
         />
       </View>
