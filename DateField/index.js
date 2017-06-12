@@ -69,7 +69,7 @@ class DateInput extends React.Component {
           maximumDate={maxDate}
           mode={mode}
           androidStyles={androidStyles}
-          formatDay={i => i.toString().padStart(2, '0')}
+          formatDay={i => i.length < 2 ? `0${i}` : i}
           formatMonth={(i, date) => getMonthName(i)}
           onDateChange={date => onValueChange(date)}
         />
@@ -90,6 +90,7 @@ DateInput.propTypes = {
 DateInput.defaultProps = {
   selectedValue: new Date(),
   mode: 'datetime',
+  androidStyles: {},
 }
 
 export default DateInput
