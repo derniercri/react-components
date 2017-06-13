@@ -10,8 +10,8 @@ const DatePickerAndroid = ({androidStyles, date, formatDay, formatMonth, maximum
     formatMonth={formatMonth}
     mode={mode}
     locale={locale}
-    maxDate={maximumDate}
-    minDate={minimumDate}
+    maxDate={moment(maximumDate)}
+    minDate={moment(minimumDate)}
     onDateChange={date => onDateChange(date.toDate())}
   />
 )
