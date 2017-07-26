@@ -24,6 +24,7 @@ import {
 ```
 
 # MapField
+Requires `"react-native-maps": "^0.13.1"`
 googlePlaceKey
 https://console.developers.google.com
  + Google Places API Web Service
