@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {
   View,
   ScrollView,
@@ -179,15 +180,15 @@ class MapField extends React.Component {
 }
 
 MapField.propTypes = {
-  customStyles: React.PropTypes.object,
-  googlePlaceKey: React.PropTypes.string.isRequired,
-  field: React.PropTypes.string.isRequired,
-  address: React.PropTypes.string,
-  coords: React.PropTypes.object,
-  onChange: React.PropTypes.func.isRequired,
-  liteMode: React.PropTypes.bool,
-  placeholder: React.PropTypes.string,
-  pinImage: React.PropTypes.any,
+  customStyles: PropTypes.object,
+  googlePlaceKey: PropTypes.string.isRequired,
+  field: PropTypes.string.isRequired,
+  address: PropTypes.string,
+  coords: PropTypes.object,
+  onChange: PropTypes.func.isRequired,
+  liteMode: PropTypes.bool,
+  placeholder: PropTypes.string,
+  pinImage: PropTypes.any,
 }
 
 MapField.defaultProps = {

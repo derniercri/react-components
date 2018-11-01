@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import moment from 'moment'
 import PickerAndroid from './PickerAndroid'
 
@@ -17,14 +18,14 @@ const DatePickerAndroid = ({androidStyles, date, formatDay, formatMonth, maximum
 )
 
 DatePickerAndroid.propTypes = {
-  androidStyles: React.PropTypes.object,
-  date: React.PropTypes.instanceOf(Date),
-  formatDay: React.PropTypes.func,
-  formatMonth: React.PropTypes.func,
-  locale: React.PropTypes.object,
-  mode: React.PropTypes.string,
-  minimumDate: React.PropTypes.object,
-  onDateChange: React.PropTypes.func.isRequired,
+  androidStyles: PropTypes.object,
+  date: PropTypes.instanceOf(Date),
+  formatDay: PropTypes.func,
+  formatMonth: PropTypes.func,
+  locale: PropTypes.object,
+  mode: PropTypes.string,
+  minimumDate: PropTypes.object,
+  onDateChange: PropTypes.func.isRequired,
 }
 
 DatePickerAndroid.defaultProps = {

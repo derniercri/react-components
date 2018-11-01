@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { View } from 'react-native'
 import MapView from 'react-native-maps'
 
@@ -114,16 +115,16 @@ class GeolocateInput extends React.Component {
 }
 
 GeolocateInput.propTypes = {
-  allowScroll: React.PropTypes.bool,
-  value: React.PropTypes.string,
-  placeholder: React.PropTypes.string,
-  liteMode: React.PropTypes.bool,
-  region: React.PropTypes.shape({
-    latitude: React.PropTypes.number,
-    longitude: React.PropTypes.number,
+  allowScroll: PropTypes.bool,
+  value: PropTypes.string,
+  placeholder: PropTypes.string,
+  liteMode: PropTypes.bool,
+  region: PropTypes.shape({
+    latitude: PropTypes.number,
+    longitude: PropTypes.number,
   }),
-  styles: React.PropTypes.object,
-  onLocationSet: React.PropTypes.func,
+  styles: PropTypes.object,
+  onLocationSet: PropTypes.func,
 }
 
 GeolocateInput.defaultProps = {

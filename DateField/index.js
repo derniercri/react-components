@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {
   View,
   DatePickerIOS,
@@ -79,12 +80,12 @@ class DateInput extends React.Component {
 }
 
 DateInput.propTypes = {
-  androidStyles: React.PropTypes.object,
-  selectedValue: React.PropTypes.oneOfType([React.PropTypes.instanceOf(Date), React.PropTypes.number, React.PropTypes.string]),
-  mode: React.PropTypes.string,
-  minDate: React.PropTypes.instanceOf(Date),
-  maxDate: React.PropTypes.instanceOf(Date),
-  onValueChange: React.PropTypes.func.isRequired,
+  androidStyles: PropTypes.object,
+  selectedValue: PropTypes.oneOfType([PropTypes.instanceOf(Date), PropTypes.number, PropTypes.string]),
+  mode: PropTypes.string,
+  minDate: PropTypes.instanceOf(Date),
+  maxDate: PropTypes.instanceOf(Date),
+  onValueChange: PropTypes.func.isRequired,
 }
 
 DateInput.defaultProps = {
